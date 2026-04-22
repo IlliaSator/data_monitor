@@ -1,0 +1,3 @@
+SERVICE_STATUS_OK = "ok"
+DB_STATUS_UP = "up"
+DB_STATUS_DOWN = "down"

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ app_name }}</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4efe5;
+        --panel: rgba(255, 252, 247, 0.88);
+        --panel-border: rgba(83, 56, 34, 0.12);
+        --text: #2f241d;
+        --muted: #7d6858;
+        --accent: #b75d2b;
+        --accent-soft: #e7c7ac;
+        --success: #2f6b4f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(231, 199, 172, 0.7), transparent 32%),
+          linear-gradient(135deg, #f6efe3 0%, #f0e1d2 40%, #efe6dc 100%);
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 48px 24px 64px;
+      }
+
+      .hero {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        margin: 0;
+        color: var(--accent);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-size: 0.82rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.5rem, 6vw, 4.8rem);
+        line-height: 0.95;
+        max-width: 10ch;
+      }
+
+      .subtitle {
+        max-width: 62ch;
+        margin: 0;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 24px;
+        padding: 22px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 20px 40px rgba(87, 61, 42, 0.08);
+      }
+
+      .label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .value {
+        margin: 0;
+        font-size: 1.4rem;
+      }
+
+      .status {
+        color: var(--success);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">ML Monitoring Dashboard</p>
+        <h1>{{ app_name }}</h1>
+        <p class="subtitle">
+          Credit scoring monitoring service with batch ingestion, drift tracking,
+          PostgreSQL persistence, alerting, and deployment-ready infrastructure.
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <span class="label">Environment</span>
+          <p class="value">{{ environment }}</p>
+        </article>
+        <article class="card">
+          <span class="label">App Version</span>
+          <p class="value">{{ app_version }}</p>
+        </article>
+        <article class="card">
+          <span class="label">Model Version</span>
+          <p class="value">{{ model_version }}</p>
+        </article>
+        <article class="card">
+          <span class="label">Service Status</span>
+          <p class="value status">Bootstrap ready</p>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
