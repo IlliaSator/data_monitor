@@ -14,3 +14,13 @@ class RetrainTriggerResponse(BaseModel):
     retrain_required: bool
     reason: str
     triggered_at: datetime
+
+
+class RetrainingEventResponse(BaseModel):
+    id: int
+    model_version: str
+    reason: str
+    triggered_by: str
+    drift_score: float | None
+    resolved: bool
+    created_at: datetime

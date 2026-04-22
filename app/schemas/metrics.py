@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from app.schemas.performance import PerformanceMetricResponse
+
 
 class GlobalDriftPoint(BaseModel):
     created_at: datetime
@@ -27,3 +29,4 @@ class FeatureDriftHistoryPoint(BaseModel):
 class MetricsHistoryResponse(BaseModel):
     global_metrics: list[GlobalDriftPoint]
     feature_metrics: list[FeatureDriftHistoryPoint]
+    performance_metrics: list[PerformanceMetricResponse]

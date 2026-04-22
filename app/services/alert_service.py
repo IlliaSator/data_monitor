@@ -81,6 +81,16 @@ class AlertService:
 
         return list(self.db.scalars(statement).all())
 
+    def update_status(self, alert_id: int, status: AlertStatus) -> Alert:
+        alert = self.db.get(Alert, alert_id)
+        if alert is None:
+            raise ValueError(f"Alert with id={alert_id} was not found.")
+        alert.status = status
+        alert.resolved = status == AlertStatus.resolved
+        self.db.commit()
+        self.db.refresh(alert)
+        return alert
+
     def _resolve_severity(self, drift_score: float, threshold: float) -> AlertSeverity:
         ratio = drift_score / max(threshold, 1e-6)
         if ratio >= 1.5:

@@ -74,7 +74,8 @@ class DriftService:
         )
         if drift_report.alert_triggered:
             RetrainService(self.db, self.settings).mark_retrain_required(
-                "Global drift score exceeded alert threshold."
+                "Global drift score exceeded alert threshold.",
+                drift_score=drift_report.global_drift_score,
             )
 
         batch.baseline_version = baseline.version

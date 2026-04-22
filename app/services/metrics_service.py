@@ -12,6 +12,7 @@ from app.schemas.metrics import (
     GlobalDriftPoint,
     MetricsHistoryResponse,
 )
+from app.services.performance_service import PerformanceService
 
 
 class MetricsService:
@@ -52,9 +53,7 @@ class MetricsService:
                 select(FeatureDriftMetric)
                 .join(DriftReport, DriftReport.id == FeatureDriftMetric.drift_report_id)
                 .join(Batch, Batch.id == DriftReport.batch_id)
-                .options(
-                    joinedload(FeatureDriftMetric.drift_report).joinedload(DriftReport.batch)
-                )
+                .options(joinedload(FeatureDriftMetric.drift_report).joinedload(DriftReport.batch))
                 .where(FeatureDriftMetric.drift_report_id.in_(report_ids))
                 .order_by(FeatureDriftMetric.created_at.desc())
             )
@@ -86,4 +85,5 @@ class MetricsService:
                 )
                 for metric in feature_metrics
             ],
+            performance_metrics=PerformanceService(self.db).list_history(),
         )

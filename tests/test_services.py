@@ -1,13 +1,18 @@
 from pathlib import Path
 
 from app.core.config import Settings
+from app.models.alert import Alert
 from app.models.baseline import Baseline
 from app.models.batch import Batch
 from app.models.drift_report import DriftReport
+from app.models.enums import AlertStatus
 from app.models.model_version import ModelVersion
+from app.models.performance_metric import PerformanceMetric
 from app.models.prediction_log import PredictionLog
+from app.models.retraining_event import RetrainingEvent
 from app.schemas.baseline import BaselineReinitializeRequest
 from app.schemas.ingest import IngestRequest
+from app.services.alert_service import AlertService
 from app.services.baseline_service import BaselineService
 from app.services.ingestion_service import IngestionService
 from app.services.retrain_service import RetrainService
@@ -25,10 +30,13 @@ def test_ingestion_service_persists_batch_predictions_and_drift(db_session, samp
     response = IngestionService(db_session, settings).ingest_batch(payload)
 
     assert response.size == 2
+    assert response.performance_tracked is True
     assert db_session.query(Batch).count() == 1
     assert db_session.query(PredictionLog).count() == 2
     assert db_session.query(DriftReport).count() == 1
+    assert db_session.query(PerformanceMetric).count() == 1
     assert db_session.query(ModelVersion).one().retrain_required is True
+    assert db_session.query(RetrainingEvent).count() == 1
 
 
 def test_baseline_service_reinitializes_active_baseline(db_session):
@@ -72,3 +80,21 @@ def test_retrain_service_sets_flag_for_active_model(db_session):
     db_session.refresh(model)
     assert response.retrain_required is True
     assert model.retrain_required is True
+    assert db_session.query(RetrainingEvent).count() == 1
+
+
+def test_alert_service_updates_status(db_session):
+    alert = Alert(
+        drift_report_id=1,
+        feature_name="credit_utilization",
+        drift_score=0.8,
+        threshold=0.4,
+        message="Drift exceeded threshold",
+    )
+    db_session.add(alert)
+    db_session.commit()
+
+    updated = AlertService(db_session).update_status(alert.id, AlertStatus.acknowledged)
+
+    assert updated.status == AlertStatus.acknowledged
+    assert updated.resolved is False

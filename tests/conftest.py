@@ -53,6 +53,7 @@ def sample_batch() -> dict:
                 "delinquency_count": 1,
                 "loan_amount": 12000.0,
                 "employment_years": 6.0,
+                "actual_default": False,
             },
             {
                 "customer_id": "cust-2",
@@ -64,6 +65,7 @@ def sample_batch() -> dict:
                 "delinquency_count": 2,
                 "loan_amount": 21000.0,
                 "employment_years": 2.0,
+                "actual_default": True,
             },
         ],
     }

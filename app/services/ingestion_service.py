@@ -15,6 +15,7 @@ from app.models.prediction_log import PredictionLog
 from app.monitoring.quality_checks import run_quality_checks
 from app.schemas.ingest import IngestRequest, IngestResponse, PredictionLogResponse
 from app.services.drift_service import DriftService
+from app.services.performance_service import PerformanceService
 
 
 class IngestionService:
@@ -24,7 +25,9 @@ class IngestionService:
 
     def ingest_batch(self, payload: IngestRequest) -> IngestResponse:
         batch_id = payload.batch_id or f"batch-{uuid4().hex[:12]}"
-        dataframe = pd.DataFrame([record.model_dump() for record in payload.records])
+        dataframe = pd.DataFrame(
+            [record.model_dump(exclude={"actual_default"}) for record in payload.records]
+        )
         quality_result = run_quality_checks(dataframe)
 
         if self._batch_exists(batch_id):
@@ -35,7 +38,7 @@ class IngestionService:
 
         if not quality_result.is_valid:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": "Batch failed data quality checks.",
                     "warnings": quality_result.warnings,
@@ -61,8 +64,12 @@ class IngestionService:
 
             prediction_logs = []
             response_predictions: list[PredictionLogResponse] = []
+            prediction_values: list[float] = []
+            actual_labels: list[bool] = []
             for record in payload.records:
-                prediction_value = self._score_record(record.model_dump())
+                record_payload = record.model_dump()
+                actual_label = record_payload.pop("actual_default", None)
+                prediction_value = self._score_record(record_payload)
                 prediction_label = "high_risk" if prediction_value >= 0.5 else "low_risk"
                 prediction_logs.append(
                     PredictionLog(
@@ -70,8 +77,9 @@ class IngestionService:
                         customer_id=record.customer_id,
                         prediction=prediction_value,
                         prediction_label=prediction_label,
+                        actual_label=actual_label,
                         model_version=self.settings.model_version,
-                        features=record.model_dump(),
+                        features=record_payload,
                     )
                 )
                 response_predictions.append(
@@ -81,12 +89,23 @@ class IngestionService:
                         prediction_label=prediction_label,
                     )
                 )
+                prediction_values.append(prediction_value)
+                if actual_label is not None:
+                    actual_labels.append(actual_label)
 
             self.db.add_all(prediction_logs)
             drift_report = DriftService(self.db, self.settings).analyze_batch(
                 batch=batch,
                 current_records=[record.model_dump() for record in payload.records],
             )
+            performance_tracked = len(actual_labels) == len(payload.records)
+            if performance_tracked:
+                PerformanceService(self.db).create_batch_metrics(
+                    batch=batch,
+                    predictions=prediction_values,
+                    actual_labels=actual_labels,
+                    model_version=self.settings.model_version,
+                )
             self.db.commit()
         except HTTPException:
             self.db.rollback()
@@ -108,6 +127,7 @@ class IngestionService:
             baseline_version=batch.baseline_version,
             quality_summary=quality_result.summary,
             predictions=response_predictions,
+            performance_tracked=performance_tracked,
         )
 
     def _batch_exists(self, batch_id: str) -> bool:

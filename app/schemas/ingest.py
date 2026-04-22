@@ -14,6 +14,7 @@ class CreditApplicationRecord(BaseModel):
     delinquency_count: int = Field(ge=0, le=20)
     loan_amount: float = Field(gt=0)
     employment_years: float = Field(ge=0, le=50)
+    actual_default: bool | None = None
 
     model_config = ConfigDict(extra="forbid", strict=True)
 
@@ -51,3 +52,4 @@ class IngestResponse(BaseModel):
     baseline_version: str | None
     quality_summary: dict[str, Any]
     predictions: list[PredictionLogResponse]
+    performance_tracked: bool

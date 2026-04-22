@@ -34,6 +34,11 @@ class Batch(Base, TimestampMixin):
         back_populates="batch",
         cascade="all, delete-orphan",
     )
+    performance_metrics = relationship(
+        "PerformanceMetric",
+        back_populates="batch",
+        cascade="all, delete-orphan",
+    )
     drift_reports = relationship(
         "DriftReport",
         back_populates="batch",

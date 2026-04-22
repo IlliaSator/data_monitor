@@ -232,6 +232,20 @@
           <span class="label">Last Ingest</span>
           <p class="value">{{ last_ingest_at or "No batches yet" }}</p>
         </article>
+        <article class="card">
+          <span class="label">Latest Accuracy</span>
+          <p class="value">{{ "%.3f"|format(latest_accuracy) if latest_accuracy is not none else "n/a" }}</p>
+        </article>
+        <article class="card">
+          <span class="label">Latest ROC AUC</span>
+          <p class="value {% if latest_roc_auc is not none and latest_roc_auc < 0.7 %}alert{% else %}status{% endif %}">
+            {{ "%.3f"|format(latest_roc_auc) if latest_roc_auc is not none else "n/a" }}
+          </p>
+        </article>
+        <article class="card">
+          <span class="label">Performance Batches</span>
+          <p class="value">{{ performance_tracked_batches }}</p>
+        </article>
       </section>
 
       <section class="analytics-grid">
@@ -297,6 +311,51 @@
           {% else %}
           <p class="muted">Feature summary will appear after the first report is generated.</p>
           {% endif %}
+        </article>
+      </section>
+
+      <section class="detail-grid" style="margin-top: 18px;">
+        <article class="card">
+          <h2 class="section-title">Recent Retraining Events</h2>
+          {% if retraining_events %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Source</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in retraining_events %}
+              <tr>
+                <td>{{ event.model_version }}</td>
+                <td>{{ event.triggered_by }}</td>
+                <td>{{ event.reason }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="muted">No retraining events yet.</p>
+          {% endif %}
+        </article>
+        <article class="card">
+          <h2 class="section-title">Monitoring Readout</h2>
+          <ul class="compact">
+            <li>
+              <strong>Drift monitoring</strong>
+              <span class="muted">Feature-level PSI plus Evidently HTML reporting.</span>
+            </li>
+            <li>
+              <strong>Performance tracking</strong>
+              <span class="muted">Accuracy, precision, recall, F1, and ROC AUC when labels are available.</span>
+            </li>
+            <li>
+              <strong>Operational lifecycle</strong>
+              <span class="muted">Alerts can be acknowledged/resolved and high drift raises retrain signals.</span>
+            </li>
+          </ul>
         </article>
       </section>
     </main>

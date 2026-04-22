@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.enums import AlertSeverity
-from app.schemas.alert import AlertResponse
+from app.schemas.alert import AlertResponse, AlertStatusUpdateRequest
 from app.services.alert_service import AlertService
 
 router = APIRouter()
@@ -31,3 +31,16 @@ def list_alerts(
         unresolved_only=unresolved_only,
     )
     return [AlertResponse.model_validate(alert, from_attributes=True) for alert in alerts]
+
+
+@router.patch("/alerts/{alert_id}", response_model=AlertResponse)
+def update_alert_status(
+    alert_id: int,
+    payload: AlertStatusUpdateRequest,
+    service: Annotated[AlertService, Depends(get_alert_service)],
+) -> AlertResponse:
+    try:
+        alert = service.update_status(alert_id, payload.status)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return AlertResponse.model_validate(alert, from_attributes=True)
