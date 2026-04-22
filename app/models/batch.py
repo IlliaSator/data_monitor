@@ -16,6 +16,7 @@ class Batch(Base, TimestampMixin):
     baseline_version: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     size: Mapped[int] = mapped_column(Integer, nullable=False)
     schema_version: Mapped[str] = mapped_column(String(32), default="v1", nullable=False)
+    request_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     ingest_started_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
