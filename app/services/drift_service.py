@@ -14,6 +14,7 @@ from app.monitoring.drift_calculator import (
     calculate_global_drift_score,
 )
 from app.monitoring.evidently_runner import EvidentlyRunner
+from app.services.alert_service import AlertService
 from app.services.baseline_service import BaselineService
 from app.services.report_service import ReportService
 
@@ -64,7 +65,12 @@ class DriftService:
         self.db.add(drift_report)
         self.db.flush()
 
-        self._persist_feature_metrics(drift_report.id, feature_results)
+        feature_metrics = self._persist_feature_metrics(drift_report.id, feature_results)
+        AlertService(self.db).create_alerts_for_report(
+            drift_report=drift_report,
+            feature_metrics=feature_metrics,
+            alert_threshold=self.settings.alert_threshold,
+        )
 
         batch.baseline_version = baseline.version
         self.db.flush()
@@ -74,7 +80,7 @@ class DriftService:
         self,
         drift_report_id: int,
         feature_results: list[FeatureDriftResult],
-    ) -> None:
+    ) -> list[FeatureDriftMetric]:
         metrics = [
             FeatureDriftMetric(
                 drift_report_id=drift_report_id,
@@ -87,3 +93,4 @@ class DriftService:
             for result in feature_results
         ]
         self.db.add_all(metrics)
+        return metrics
