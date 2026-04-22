@@ -15,6 +15,7 @@
         --accent: #b75d2b;
         --accent-soft: #e7c7ac;
         --success: #2f6b4f;
+        --danger: #9f3d29;
       }
 
       * {
@@ -32,7 +33,7 @@
       }
 
       main {
-        max-width: 1100px;
+        max-width: 1200px;
         margin: 0 auto;
         padding: 48px 24px 64px;
       }
@@ -41,6 +42,14 @@
         display: grid;
         gap: 20px;
         margin-bottom: 28px;
+      }
+
+      .hero-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+        flex-wrap: wrap;
       }
 
       .eyebrow {
@@ -66,10 +75,35 @@
         color: var(--muted);
       }
 
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #fff8f1;
+        text-decoration: none;
+      }
+
       .grid {
         display: grid;
         gap: 18px;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-bottom: 22px;
+      }
+
+      .analytics-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: 1.7fr 1fr;
+        margin-bottom: 22px;
+      }
+
+      .detail-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: 1.2fr 1fr;
       }
 
       .card {
@@ -96,23 +130,81 @@
       .status {
         color: var(--success);
       }
+
+      .alert {
+        color: var(--danger);
+      }
+
+      .section-title {
+        margin: 0 0 12px;
+        font-size: 1.2rem;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .table th,
+      .table td {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(83, 56, 34, 0.1);
+        text-align: left;
+        font-size: 0.95rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+      }
+
+      ul.compact {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      ul.compact li {
+        margin-bottom: 10px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      @media (max-width: 900px) {
+        .analytics-grid,
+        .detail-grid {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
     <main>
       <section class="hero">
-        <p class="eyebrow">ML Monitoring Dashboard</p>
-        <h1>{{ app_name }}</h1>
+        <div class="hero-top">
+          <div>
+            <p class="eyebrow">ML Monitoring Dashboard</p>
+            <h1>{{ app_name }}</h1>
+          </div>
+          {% if latest_report_url %}
+          <a class="cta" href="{{ latest_report_url }}" target="_blank" rel="noreferrer">
+            Open Latest Drift Report
+          </a>
+          {% endif %}
+        </div>
         <p class="subtitle">
-          Credit scoring monitoring service with batch ingestion, drift tracking,
-          PostgreSQL persistence, alerting, and deployment-ready infrastructure.
+          Credit scoring monitoring service with batch ingestion, persisted predictions,
+          drift scoring, threshold-based alerts, and interview-ready observability.
         </p>
       </section>
 
       <section class="grid">
         <article class="card">
-          <span class="label">Environment</span>
-          <p class="value">{{ environment }}</p>
+          <span class="label">Service Status</span>
+          <p class="value status">{{ service_status }}</p>
         </article>
         <article class="card">
           <span class="label">App Version</span>
@@ -123,8 +215,88 @@
           <p class="value">{{ model_version }}</p>
         </article>
         <article class="card">
-          <span class="label">Service Status</span>
-          <p class="value status">Bootstrap ready</p>
+          <span class="label">Environment</span>
+          <p class="value">{{ environment }}</p>
+        </article>
+        <article class="card">
+          <span class="label">Latest Global Drift</span>
+          <p class="value {% if latest_global_score and latest_global_score >= 0.7 %}alert{% else %}status{% endif %}">
+            {{ "%.3f"|format(latest_global_score) if latest_global_score is not none else "n/a" }}
+          </p>
+        </article>
+        <article class="card">
+          <span class="label">Baseline Version</span>
+          <p class="value">{{ latest_baseline_version or "n/a" }}</p>
+        </article>
+        <article class="card">
+          <span class="label">Last Ingest</span>
+          <p class="value">{{ last_ingest_at or "No batches yet" }}</p>
+        </article>
+      </section>
+
+      <section class="analytics-grid">
+        <article class="card">
+          <h2 class="section-title">Drift Trend</h2>
+          {% if global_drift_chart %}
+          {{ global_drift_chart | safe }}
+          {% else %}
+          <p class="muted">No drift history yet. Send a batch to populate the timeline.</p>
+          {% endif %}
+        </article>
+        <article class="card">
+          <h2 class="section-title">Top Drifted Features</h2>
+          {% if top_feature_chart %}
+          {{ top_feature_chart | safe }}
+          {% else %}
+          <p class="muted">Feature-level drift appears after the first ingest.</p>
+          {% endif %}
+        </article>
+      </section>
+
+      <section class="detail-grid">
+        <article class="card">
+          <h2 class="section-title">Latest Alerts</h2>
+          {% if alerts %}
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Score</th>
+                <th>Threshold</th>
+                <th>Severity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for alert in alerts %}
+              <tr>
+                <td>{{ alert.feature_name or "global" }}</td>
+                <td>{{ "%.3f"|format(alert.drift_score) }}</td>
+                <td>{{ "%.3f"|format(alert.threshold) }}</td>
+                <td><span class="pill">{{ alert.severity }}</span></td>
+                <td>{{ alert.status }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="muted">No alerts are open right now.</p>
+          {% endif %}
+        </article>
+        <article class="card">
+          <h2 class="section-title">Most Drifted Signals</h2>
+          {% if top_features %}
+          <ul class="compact">
+            {% for feature in top_features %}
+            <li>
+              <strong>{{ feature.feature_name }}</strong>
+              <span class="muted">score {{ "%.3f"|format(feature.drift_score) }}, batch {{ feature.batch_id }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="muted">Feature summary will appear after the first report is generated.</p>
+          {% endif %}
         </article>
       </section>
     </main>
