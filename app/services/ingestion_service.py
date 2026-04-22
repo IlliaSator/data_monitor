@@ -14,6 +14,7 @@ from app.models.model_version import ModelVersion
 from app.models.prediction_log import PredictionLog
 from app.monitoring.quality_checks import run_quality_checks
 from app.schemas.ingest import IngestRequest, IngestResponse, PredictionLogResponse
+from app.services.drift_service import DriftService
 
 
 class IngestionService:
@@ -82,6 +83,10 @@ class IngestionService:
                 )
 
             self.db.add_all(prediction_logs)
+            drift_report = DriftService(self.db, self.settings).analyze_batch(
+                batch=batch,
+                current_records=[record.model_dump() for record in payload.records],
+            )
             self.db.commit()
         except HTTPException:
             self.db.rollback()
@@ -96,7 +101,7 @@ class IngestionService:
         return IngestResponse(
             batch_id=batch.external_id,
             size=batch.size,
-            drift_status="pending_baseline",
+            drift_status="drift_detected" if drift_report.drift_detected else "stable",
             warnings=quality_result.warnings,
             timestamp=batch.ingest_completed_at or datetime.now(UTC),
             model_version=batch.model_version,
