@@ -6,14 +6,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+from app.jobs.scheduler import create_scheduler
 
 settings = get_settings()
+scheduler = create_scheduler()
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     configure_logging()
+    if not scheduler.running:
+        scheduler.start()
     yield
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
 
 
 app = FastAPI(

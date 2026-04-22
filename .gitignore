@@ -11,5 +11,6 @@ build/
 .env
 reports/
 artifacts/
+data/baselines/*.csv
 alembic/versions/__pycache__/
 postgres_data/

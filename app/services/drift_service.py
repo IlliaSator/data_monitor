@@ -17,6 +17,7 @@ from app.monitoring.evidently_runner import EvidentlyRunner
 from app.services.alert_service import AlertService
 from app.services.baseline_service import BaselineService
 from app.services.report_service import ReportService
+from app.services.retrain_service import RetrainService
 
 
 class DriftService:
@@ -71,6 +72,10 @@ class DriftService:
             feature_metrics=feature_metrics,
             alert_threshold=self.settings.alert_threshold,
         )
+        if drift_report.alert_triggered:
+            RetrainService(self.db, self.settings).mark_retrain_required(
+                "Global drift score exceeded alert threshold."
+            )
 
         batch.baseline_version = baseline.version
         self.db.flush()
