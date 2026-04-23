@@ -15,6 +15,7 @@ from app.models.prediction_log import PredictionLog
 from app.monitoring.quality_checks import run_quality_checks
 from app.schemas.ingest import IngestRequest, IngestResponse, PredictionLogResponse
 from app.services.drift_service import DriftService
+from app.services.model_service import ModelPredictor
 from app.services.performance_service import PerformanceService
 
 
@@ -22,6 +23,7 @@ class IngestionService:
     def __init__(self, db: Session, settings: Settings) -> None:
         self.db = db
         self.settings = settings
+        self.model_predictor = ModelPredictor(settings)
 
     def ingest_batch(self, payload: IngestRequest) -> IngestResponse:
         batch_id = payload.batch_id or f"batch-{uuid4().hex[:12]}"
@@ -150,18 +152,7 @@ class IngestionService:
             self.db.flush()
 
     def _score_record(self, record: dict[str, float | int | str]) -> float:
-        raw_score = (
-            0.18 * float(record["debt_to_income"])
-            + 0.22 * float(record["credit_utilization"])
-            + 0.12 * float(record["delinquency_count"]) / 10
-            + 0.14 * float(record["loan_amount"]) / 50000
-            - 0.10 * float(record["annual_income"]) / 150000
-            - 0.08 * float(record["employment_years"]) / 10
-            - 0.06 * float(record["num_open_accounts"]) / 12
-            - 0.04 * float(record["age"]) / 100
-        )
-        normalized = min(max(raw_score + 0.45, 0.0), 1.0)
-        return round(normalized, 4)
+        return self.model_predictor.predict_default_probability(record)
 
 
 def get_ingestion_service(db: Session) -> IngestionService:

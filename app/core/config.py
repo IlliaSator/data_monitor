@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     alert_threshold: float = Field(default=0.7, alias="ALERT_THRESHOLD")
     baseline_path: str = Field(default="data/baseline_credit_scoring.csv", alias="BASELINE_PATH")
     model_version: str = Field(default="credit_scoring_v1", alias="MODEL_VERSION")
+    model_path: str | None = Field(default="models/credit_scoring_model.joblib", alias="MODEL_PATH")
     reports_dir: str = Field(default="reports", alias="REPORTS_DIR")
     timezone: str = Field(default="Europe/Minsk", alias="TIMEZONE")
     cors_origins: list[str] = Field(
