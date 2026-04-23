@@ -25,6 +25,8 @@ Open:
 http://localhost:8000
 ```
 
+Interview walkthrough: [`docs/interview_demo_guide.md`](docs/interview_demo_guide.md)
+
 ## English
 
 ### What Problem This Solves
@@ -80,10 +82,21 @@ Sources:
 - OpenML dataset: `credit-g` (`https://api.openml.org/d/31`)
 - scikit-learn API: `fetch_openml` (`https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_openml.html`)
 
+### Model Strategy
+
+The service uses a real scikit-learn model artifact by default:
+
+- training script: `scripts/train_credit_model.py`
+- model artifact: `models/credit_scoring_model.joblib`
+- runtime setting: `MODEL_PATH=models/credit_scoring_model.joblib`
+
+The artifact is a `StandardScaler` + `LogisticRegression` pipeline trained on the prepared OpenML credit dataset. The current holdout metrics are intentionally modest and realistic for a compact public credit scoring demo: ROC AUC is around `0.77`. If `MODEL_PATH` is missing in a fresh environment, the service falls back to a deterministic rule-based scorer so the monitoring workflow remains demo-safe.
+
 ### Main Capabilities
 
 - `POST /ingest` accepts JSON batches, validates schema, stores batch metadata and prediction logs
 - data quality checks catch empty batches, missing values, duplicate rows, and schema issues
+- predictions come from a persisted scikit-learn model artifact, with a deterministic fallback for resilience
 - feature-level drift is calculated with PSI
 - Evidently generates an HTML drift report for every ingested batch
 - PostgreSQL stores batches, predictions, drift reports, feature drift metrics, performance metrics, alerts, baselines, model versions, and retraining events
@@ -276,6 +289,7 @@ Recommended Railway variables:
 - `ALERT_THRESHOLD`
 - `BASELINE_PATH`
 - `MODEL_VERSION`
+- `MODEL_PATH`
 - `REPORTS_DIR`
 - `TIMEZONE`
 - `CORS_ORIGINS`
@@ -288,6 +302,12 @@ Run locally:
 ruff check .
 pytest -q
 alembic upgrade head --sql
+```
+
+Prepare richer dashboard history for a live demo:
+
+```bash
+python scripts/seed_demo_history.py
 ```
 
 GitHub Actions runs:
@@ -557,6 +577,7 @@ uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
 - `ALERT_THRESHOLD`
 - `BASELINE_PATH`
 - `MODEL_VERSION`
+- `MODEL_PATH`
 - `REPORTS_DIR`
 - `TIMEZONE`
 - `CORS_ORIGINS`
