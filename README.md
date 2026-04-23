@@ -54,8 +54,8 @@ This keeps the project honest: the service can run with a small built-in demo ba
 
 Sources:
 
-- OpenML dataset: `credit-g`
-- scikit-learn API: `fetch_openml`
+- OpenML dataset: `credit-g` (`https://api.openml.org/d/31`)
+- scikit-learn API: `fetch_openml` (`https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_openml.html`)
 
 ### Main Capabilities
 
@@ -350,8 +350,8 @@ python scripts/prepare_public_dataset.py
 
 Источники:
 
-- OpenML dataset: `credit-g`
-- scikit-learn API: `fetch_openml`
+- OpenML dataset: `credit-g` (`https://api.openml.org/d/31`)
+- scikit-learn API: `fetch_openml` (`https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_openml.html`)
 
 ### Основные возможности
 
