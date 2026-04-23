@@ -275,21 +275,6 @@ GitHub Actions runs:
 - Alembic SQL validation
 - Docker image build
 
-### Why This Is Middle / Middle+ Level
-
-This project goes beyond a simple FastAPI prediction endpoint. It shows:
-
-- modular service-layer architecture
-- normalized monitoring storage
-- versioned baselines
-- data drift and model performance monitoring
-- alert lifecycle
-- retraining event tracking
-- Dockerized runtime
-- migration-aware startup
-- tests and CI
-- clear dashboard for non-code inspection
-
 Remaining realistic future improvements:
 
 - real trained model artifact instead of demo scoring logic
@@ -571,25 +556,4 @@ GitHub Actions запускает:
 - Alembic SQL validation
 - Docker image build
 
-### Почему это уровень middle / middle+
 
-Проект уже не выглядит как простой FastAPI endpoint для prediction. Он показывает:
-
-- modular service-layer architecture
-- normalized monitoring storage
-- versioned baselines
-- data drift и model performance monitoring
-- alert lifecycle
-- retraining event tracking
-- Dockerized runtime
-- migration-aware startup
-- tests and CI
-- dashboard, который можно открыть и быстро понять состояние сервиса
-
-Что можно улучшить дальше:
-
-- подключить настоящий trained model artifact вместо demo scoring logic
-- вынести reports и baselines в object storage
-- добавить authentication и role-based alert actions
-- вынести тяжелую генерацию reports в async worker queue
-- расширить data validation через Pandera
