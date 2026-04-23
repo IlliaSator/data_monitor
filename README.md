@@ -2,6 +2,10 @@
 
 Production-like ML monitoring service for a credit scoring use case. The project is designed as a middle to middle+ ML/MLOps interview showcase: it demonstrates ingestion, prediction logging, data drift, model performance monitoring, alert lifecycle, baseline management, retraining triggers, PostgreSQL persistence, dashboarding, Docker, migrations, tests, CI, and deployment notes.
 
+## Live Demo
+
+Deployment target: Railway. Public URL will be added here after the service is promoted from the deployment environment.
+
 ## English
 
 ### What Problem This Solves
@@ -275,13 +279,13 @@ GitHub Actions runs:
 - Alembic SQL validation
 - Docker image build
 
-Remaining realistic future improvements:
+### Roadmap
 
-- real trained model artifact instead of demo scoring logic
-- object storage for reports and baselines
+- object storage for reports and baseline artifacts
 - authentication and role-based alert actions
-- async worker queue for heavy report generation
+- async worker queue for report generation
 - richer data validation with Pandera
+- model registry integration for version promotion workflows
 
 ## Русский
 
@@ -557,3 +561,10 @@ GitHub Actions запускает:
 - Docker image build
 
 
+### Roadmap
+
+- вынести reports и baselines в object storage
+- добавить authentication и role-based alert actions
+- вынести генерацию reports в async worker queue
+- расширить data validation через Pandera
+- добавить model registry integration для promotion workflows
