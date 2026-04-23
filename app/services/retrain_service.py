@@ -27,9 +27,7 @@ class RetrainService:
 
         model_version.retrain_required = True
         existing_description = model_version.description or ""
-        model_version.description = (
-            f"{existing_description}\nRetrain trigger: {reason}".strip()
-        )
+        model_version.description = f"{existing_description}\nRetrain trigger: {reason}".strip()
         triggered_at = datetime.now(UTC)
         self.db.add(
             RetrainingEvent(
@@ -54,9 +52,7 @@ class RetrainService:
             return
         model_version.retrain_required = True
         existing_description = model_version.description or ""
-        model_version.description = (
-            f"{existing_description}\nRetrain trigger: {reason}".strip()
-        )
+        model_version.description = f"{existing_description}\nRetrain trigger: {reason}".strip()
         self.db.add(
             RetrainingEvent(
                 model_version_id=model_version.id,

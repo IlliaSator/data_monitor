@@ -15,6 +15,9 @@ Pydantic validation + quality checks
 Batch + prediction_logs persisted
    |
    v
+Optional performance metrics calculated when labels are present
+   |
+   v
 Active baseline loaded from artifact
    |
    v
@@ -25,7 +28,9 @@ drift_reports + feature_drift_metrics persisted
    |
    +--> alerts persisted
    |
-   +--> retrain_required set when severe drift appears
+   +--> retraining_events persisted when severe drift appears
+   |
+   +--> retrain_required set on active model
    |
    v
 Dashboard / APIs read historical state from PostgreSQL
@@ -41,13 +46,14 @@ Dashboard / APIs read historical state from PostgreSQL
 
 ### Services
 
-- orchestrate ingestion, drift, alerts, baseline lifecycle, reports, health, and retraining
+- orchestrate ingestion, drift, performance, alerts, baseline lifecycle, reports, health, and retraining
 - designed to stay testable outside HTTP
 
 ### Monitoring Layer
 
 - quality checks
 - PSI drift logic
+- batch-level performance metrics when labels are available
 - Evidently HTML report generation
 
 ### Persistence Layer
@@ -77,6 +83,8 @@ Tracks ingestion sessions:
 
 Stores per-record prediction outputs and original feature snapshots.
 
+Optional `actual_label` enables delayed model performance monitoring when ground-truth labels are available.
+
 ### `drift_reports`
 
 Stores one global drift result per batch:
@@ -90,6 +98,17 @@ Stores one global drift result per batch:
 
 Stores detailed feature-level drift scores for historical analysis and charts.
 
+### `performance_metrics`
+
+Stores batch-level model quality metrics:
+
+- accuracy
+- precision
+- recall
+- F1
+- ROC AUC
+- positive rate
+
 ### `alerts`
 
 Represents operational incidents caused by threshold breaches.
@@ -101,6 +120,10 @@ Represents versioned baseline snapshots and their file artifacts.
 ### `model_versions`
 
 Represents deployable model metadata and retraining state.
+
+### `retraining_events`
+
+Stores manual and automatic retraining triggers with reason, trigger source, and optional drift score.
 
 ## Design Choices
 
@@ -115,3 +138,7 @@ The baseline lives in CSV artifacts referenced by DB metadata, which makes versi
 ### Retraining as hook, not fake pipeline
 
 This repository does not pretend to train models. It exposes the operational signal that a real training system would consume.
+
+### Public dataset preparation
+
+The service ships with a small demo baseline and a reproducible OpenML `credit-g` preparation script. The script transforms public credit data into the numeric monitoring contract used by the API, which keeps the demo practical without hiding that a transformation step exists.
