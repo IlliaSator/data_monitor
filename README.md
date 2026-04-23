@@ -2,9 +2,22 @@
 
 Production-like ML monitoring service for a credit scoring use case. The project is designed as a middle to middle+ ML/MLOps interview showcase: it demonstrates ingestion, prediction logging, data drift, model performance monitoring, alert lifecycle, baseline management, retraining triggers, PostgreSQL persistence, dashboarding, Docker, migrations, tests, CI, and deployment notes.
 
-## Live Demo
+## Demo Options
 
-Deployment target: Railway. Public URL will be added here after the service is promoted from the deployment environment.
+The primary demo path is local Docker Compose. The service is also deployment-ready for Railway-like platforms, so a temporary public URL can be started before interviews if needed.
+
+Quick local demo:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Open:
+
+```text
+http://localhost:8000
+```
 
 ## English
 
