@@ -2,6 +2,12 @@
 
 Production-like ML monitoring service for a credit scoring use case. The project is designed as a middle to middle+ ML/MLOps interview showcase: it demonstrates ingestion, prediction logging, data drift, model performance monitoring, alert lifecycle, baseline management, retraining triggers, PostgreSQL persistence, dashboarding, Docker, migrations, tests, CI, and deployment notes.
 
+## Screenshots
+
+![Credit scoring monitoring dashboard](docs/screenshots/dashboard.png)
+
+![Evidently drift report](docs/screenshots/evidently-drift-report.png)
+
 ## Demo Options
 
 The primary demo path is local Docker Compose. The service is also deployment-ready for Railway-like platforms, so a temporary public URL can be started before interviews if needed.
