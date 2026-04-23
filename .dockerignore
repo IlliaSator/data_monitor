@@ -1,0 +1,11 @@
+.git
+.github
+.pytest_cache
+.ruff_cache
+.venv
+__pycache__
+reports
+postgres_data
+stage5_smoke.db
+stage6_smoke.db
+stage7_smoke.db

@@ -16,11 +16,12 @@ RUN pip install --upgrade pip setuptools wheel \
 
 COPY . .
 
-RUN mkdir -p /app/reports /app/data /app/artifacts
+RUN mkdir -p /app/reports /app/data /app/artifacts \
+    && chmod +x /app/scripts/start.sh
 
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD curl --fail http://localhost:8000/health || exit 1
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["./scripts/start.sh"]
