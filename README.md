@@ -25,8 +25,6 @@ Open:
 http://localhost:8000
 ```
 
-Interview walkthrough: [`docs/interview_demo_guide.md`](docs/interview_demo_guide.md)
-
 ## English
 
 ### What Problem This Solves
